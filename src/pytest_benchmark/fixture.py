@@ -106,7 +106,7 @@ class BenchmarkFixture(object):
 
         return runner
 
-    def _make_stats(self, iterations, func_name=[]):
+    def _make_stats(self, iterations, func_name):
         bench_stats = Metadata(self, iterations=iterations, options={
             "disable_gc": self._disable_gc,
             "timer": self._timer,
@@ -125,7 +125,6 @@ class BenchmarkFixture(object):
             raise FixtureAlreadyUsed(
                 "Fixture can only be used once. Previously it was used in %s mode." % self._mode)
         try:
-#            self._mode = 'benchmark(...)'
             return self._raw(function_to_benchmark, *args, **kwargs)
         except Exception:
             self.has_error = True
@@ -137,7 +136,6 @@ class BenchmarkFixture(object):
             raise FixtureAlreadyUsed(
                 "Fixture can only be used once. Previously it was used in %s mode." % self._mode)
         try:
-#            self._mode = 'benchmark.pedantic(...)'
             return self._raw_pedantic(target, args=args, kwargs=kwargs, setup=setup, rounds=rounds,
                                       warmup_rounds=warmup_rounds, iterations=iterations)
         except Exception:

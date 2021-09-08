@@ -80,6 +80,8 @@ class BenchmarkFixture(object):
 
     def _make_runner(self, function_to_benchmark, args, kwargs):
         def runner(loops_range, timer=self._timer):
+            # display the correct name when multiple benchmarks are done in a function
+            self.name = function_to_benchmark.__name__
             gc_enabled = gc.isenabled()
             if self._disable_gc:
                 gc.disable()
@@ -104,7 +106,7 @@ class BenchmarkFixture(object):
 
         return runner
 
-    def _make_stats(self, iterations):
+    def _make_stats(self, iterations, func_name=[]):
         bench_stats = Metadata(self, iterations=iterations, options={
             "disable_gc": self._disable_gc,
             "timer": self._timer,
@@ -123,7 +125,7 @@ class BenchmarkFixture(object):
             raise FixtureAlreadyUsed(
                 "Fixture can only be used once. Previously it was used in %s mode." % self._mode)
         try:
-            self._mode = 'benchmark(...)'
+#            self._mode = 'benchmark(...)'
             return self._raw(function_to_benchmark, *args, **kwargs)
         except Exception:
             self.has_error = True
@@ -135,7 +137,7 @@ class BenchmarkFixture(object):
             raise FixtureAlreadyUsed(
                 "Fixture can only be used once. Previously it was used in %s mode." % self._mode)
         try:
-            self._mode = 'benchmark.pedantic(...)'
+#            self._mode = 'benchmark.pedantic(...)'
             return self._raw_pedantic(target, args=args, kwargs=kwargs, setup=setup, rounds=rounds,
                                       warmup_rounds=warmup_rounds, iterations=iterations)
         except Exception:
@@ -153,7 +155,7 @@ class BenchmarkFixture(object):
             rounds = max(rounds, self._min_rounds)
             rounds = min(rounds, sys.maxsize)
 
-            stats = self._make_stats(iterations)
+            stats = self._make_stats(iterations, function_to_benchmark.__name__)
 
             self._logger.debug("  Running %s rounds x %s iterations ..." % (rounds, iterations), yellow=True, bold=True)
             run_start = time.time()
@@ -204,7 +206,7 @@ class BenchmarkFixture(object):
             args, kwargs = make_arguments()
             return target(*args, **kwargs)
 
-        stats = self._make_stats(iterations)
+        stats = self._make_stats(iterations, target.__name__)
         loops_range = XRANGE(iterations) if iterations > 1 else None
         for _ in XRANGE(warmup_rounds):
             args, kwargs = make_arguments()
@@ -254,9 +256,9 @@ class BenchmarkFixture(object):
         while self._cleanup_callbacks:
             callback = self._cleanup_callbacks.pop()
             callback()
-        if not self._mode and not self.skipped:
-            self._logger.warn("Benchmark fixture was not used at all in this test!",
-                              warner=self._warner, suspend=True)
+#        if not self._mode and not self.skipped:
+#            self._logger.warn("Benchmark fixture was not used at all in this test!",
+#                              warner=self._warner, suspend=True)
 
     def _calibrate_timer(self, runner):
         timer_precision = self._get_precision(self._timer)
